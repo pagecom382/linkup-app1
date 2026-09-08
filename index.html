@@ -15,12 +15,9 @@
   p b { color: #8B5CF6; }
   input[type="email"] { width: 100%; padding: 14px; margin: 10px 0 20px; border-radius: 8px; border: 1px solid #2a3942; background: #2a3942; color: white; font-size: 15px; }
   input:focus { outline: 2px solid #8B5CF6; }
-  
-  /* WHATSAPP OTP BOXES */
   .otp-container { display: flex; justify-content: space-between; gap: 8px; margin: 20px 0; }
   .otp-input { width: 45px; height: 50px; text-align: center; font-size: 24px; font-weight: bold; border: 2px solid #2a3942; border-radius: 8px; background: #2a3942; color: white; }
   .otp-input:focus { border-color: #8B5CF6; outline: none; }
-  
   button { width: 100%; padding: 14px; background: #8B5CF6; color: white; border: none; border-radius: 25px; font-weight: 600; font-size: 16px; cursor: pointer; margin-top: 15px; }
   button:disabled { background: #555; }
   .hidden { display: none; }
@@ -28,18 +25,19 @@
   .resend { color: #8B5CF6; text-align: center; margin-top: 10px; font-size: 14px; cursor: pointer; font-weight: 600; }
   .resend.disabled { color: #54656f; cursor: not-allowed; }
   .timer { color: #aebac1; font-size: 13px; text-align: center; margin-top: 5px; }
+  .change-email { color: #aebac1; font-size: 13px; margin-top: 15px; cursor: pointer; text-decoration: underline; }
 </style>
 </head>
 <body>
 
 <div class="box">
   <div class="logo">🔮</div>
-  <h2>Verify your email</h2>
+  <h2 id="title">Verify your email</h2>
   
   <div id="step1">
     <p>LinkUp will send you a 6-digit code to verify your email</p>
     <input type="email" id="email" placeholder="Enter your email" required>
-    <button onclick="sendOTP()">Send Code</button>
+    <button onclick="sendOTP()">Create Account</button>
   </div>
 
   <div id="step2" class="hidden">
@@ -55,10 +53,16 @@
     </div>
     
     <button onclick="verifyOTP()">Verify</button>
-    
     <p id="timer" class="timer">Resend code in 60s</p>
     <p id="resendBtn" class="resend disabled">Resend Code</p>
+    <p class="change-email" onclick="changeEmail()">Use different email</p>
     <p id="message"></p>
+  </div>
+  
+  <div id="verified" class="hidden">
+    <h2>✅ Welcome Back!</h2>
+    <p>Your email <b id="verifiedEmail"></b> is already verified</p>
+    <button onclick="goToDashboard()">Continue to LinkUp</button>
   </div>
 </div>
 
@@ -71,6 +75,18 @@ let generatedOTP = "";
 let userEmail = "";
 let countdown = 60;
 let timerInterval;
+
+// CHECK IF USER ALREADY VERIFIED WHEN PAGE LOADS
+window.onload = function() {
+  const savedEmail = localStorage.getItem("linkup_email");
+  const isVerified = localStorage.getItem("linkup_verified");
+  
+  if(savedEmail && isVerified === "true") {
+    document.getElementById("step1").classList.add("hidden");
+    document.getElementById("verified").classList.remove("hidden");
+    document.getElementById("verifiedEmail").innerText = savedEmail;
+  }
+}
 
 function moveNext(input, index) {
   if(input.value.length === 1) {
@@ -112,11 +128,14 @@ function startTimer() {
 function sendOTP() {
   const email = document.getElementById("email").value;
   if(!email) return alert("Please enter your email");
+  
   userEmail = email;
+  localStorage.setItem("linkup_email", email); // SAVE EMAIL
   generatedOTP = generateOTP();
   
   const templateParams = { to_email: email, code: generatedOTP };
   document.querySelector("#step1 button").disabled = true;
+  document.querySelector("#step1 button").innerText = "Sending...";
 
   emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
     .then(() => {
@@ -126,7 +145,11 @@ function sendOTP() {
       startTimer();
       document.querySelector(".otp-input").focus();
     })
-    .catch((err) => alert("Error: " + JSON.stringify(err)));
+    .catch((err) => {
+      alert("Error: " + JSON.stringify(err));
+      document.querySelector("#step1 button").disabled = false;
+      document.querySelector("#step1 button").innerText = "Create Account";
+    });
 }
 
 function resendOTP() {
@@ -141,13 +164,26 @@ function verifyOTP() {
   
   if(userOTP === generatedOTP) {
     clearInterval(timerInterval);
+    localStorage.setItem("linkup_verified", "true"); // SAVE VERIFIED STATUS
     msg.style.color = "#25D366";
-    msg.innerText = "✅ Verified! Welcome to LinkUp";
-    // window.location.href = "dashboard.html";
+    msg.innerText = "✅ Verified! Redirecting...";
+    setTimeout(() => {
+      goToDashboard();
+    }, 2000);
   } else {
     msg.style.color = "#f15c6d";
     msg.innerText = "❌ Wrong code. Try again";
   }
+}
+
+function goToDashboard() {
+  // window.location.href = "dashboard.html";
+  alert("Redirecting to LinkUp Dashboard...");
+}
+
+function changeEmail() {
+  localStorage.clear();
+  location.reload();
 }
 </script>
 
