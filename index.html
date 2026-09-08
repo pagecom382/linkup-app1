@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinkUp</title>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}body{background:#111b21;color:white;height:100vh}.auth-screen{position:fixed;inset:0;background:#111b21;display:flex;align-items:center;justify-content:center}.auth-box{width:92%;max-width:420px;background:#202c33;padding:30px;border-radius:15px}.logo{text-align:center;color:#25d366;font-size:34px;font-weight:bold}.input{width:100%;padding:14px;border:0;border-radius:8px;background:#2a3942;color:white;margin:12px 0}.button{width:100%;padding:14px;border:0;border-radius:8px;background:#25d366;color:#071b12;font-weight:bold}.hidden{display:none}.app{display:none;height:100vh}</style>
+</head>
+<body>
+<div class="auth-screen" id="authScreen"><div class="auth-box"><div class="logo">LinkUp</div><input class="input" id="countryCode" value="+234"><input class="input" id="phoneNumber" placeholder="8012345678"><button class="button" onclick="sendCode()">Send verification code</button><div id="recaptcha-container"></div></div></div>
+<div class="app" id="app"><h1 style="padding:20px">Welcome to LinkUp</h1></div>
+<script>
+const firebaseConfig={apiKey:"AIzaSyDyhQhEncYDaQscOtMrxz9Uj_-0-6XR-_s",authDomain:"linkup-chat-3fdd5.firebaseapp.com",databaseURL:"https://linkup-chat-3fdd5-default-rtdb.firebaseio.com",projectId:"linkup-chat-3fdd5"};
+firebase.initializeApp(firebaseConfig);const auth=firebase.auth();
+let confirmationResult;
+function sendCode(){const phone=document.getElementById("countryCode").value+document.getElementById("phoneNumber").value;const recaptcha=new firebase.auth.RecaptchaVerifier('recaptcha-container',{size:'invisible'});auth.signInWithPhoneNumber(phone,recaptcha).then(r=>{confirmationResult=r;alert("Code sent!")})}
+</script></body></html>
