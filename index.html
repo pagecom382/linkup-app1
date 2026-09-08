@@ -1,12 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LINKup</title>
-  <link rel="manifest" href="/manifest.json">
+  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#8b5cf6">
+  <style>
+    body { margin:0; background:#8b5cf6; color:white; font-family:sans-serif; text-align:center; }
+    .container { padding:20px; max-width:500px; margin:auto; }
+    input, button { width:90%; padding:12px; margin:8px 0; border-radius:10px; border:none; font-size:16px; }
+    button { background:white; color:#8b5cf6; font-weight:bold; }
+    .chat { background:white; color:#333; padding:15px; border-radius:10px; margin-top:15px; text-align:left; min-height:100px; }
+  </style>
 </head>
-<body style="background:#8b5cf6; color:white; text-align:center; padding-top:100px; font-family:sans-serif;">
-  <h1>LINKup WORKS!!! 💜</h1>
-  <p>If you see this, PWA is working</p>
+<body>
+  <div class="container">
+    <h1>LINKup 💜</h1>
+    <input id="name" placeholder="Enter person name">
+    <button onclick="addPerson()">Add Person</button>
+    <input id="msg" placeholder="Type message">
+    <button onclick="sendMsg()">Send Message</button>
+    <div id="chat" class="chat">Messages go show here...</div>
+  </div>
+<script>
+let chat = [];
+function addPerson(){ 
+  let n = document.getElementById('name').value; 
+  if(n){ chat.push("✅ Added: " + n); document.getElementById('name').value = ""; update(); }
+}
+function sendMsg(){ 
+  let m = document.getElementById('msg').value; 
+  if(m){ chat.push("You: " + m); document.getElementById('msg').value = ""; update(); }
+}
+function update(){ document.getElementById('chat').innerHTML = chat.join("<br><br>"); }
+</script>
 </body>
 </html>
