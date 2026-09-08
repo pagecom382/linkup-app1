@@ -17,6 +17,9 @@
   button:disabled { background: #555; cursor: not-allowed; }
   .hidden { display: none; }
   #message { text-align: center; margin-top: 15px; font-weight: bold; }
+  .resend { color: #8B5CF6; text-align: center; margin-top: 10px; font-size: 14px; cursor: pointer; }
+  .resend.disabled { color: #555; cursor: not-allowed; }
+  .timer { color: #aaa; font-size: 13px; text-align: center; margin-top: 5px; }
 </style>
 </head>
 <body>
@@ -34,12 +37,18 @@
     <p>We sent 6-digit code to <b id="showEmail" style="color:#8B5CF6"></b></p>
     <input type="text" id="otp" placeholder="Enter 6 digit code" maxlength="6">
     <button onclick="verifyOTP()">Verify & Continue</button>
+    
+    <div id="resendSection">
+      <p id="timer" class="timer">Resend code in 60s</p>
+      <p id="resendBtn" class="resend disabled" onclick="resendOTP()">Resend Code</p>
+    </div>
+    
     <p id="message"></p>
   </div>
 </div>
 
 <script>
-// YOUR EMAILJS KEYS - ALREADY CONFIGURED
+// YOUR EMAILJS KEYS
 (function(){ emailjs.init("KjEOuOylcmZSiRElm"); })();
 
 const SERVICE_ID = "service_uc66is9";
@@ -47,9 +56,30 @@ const TEMPLATE_ID = "template_7itzm37";
 
 let generatedOTP = "";
 let userEmail = "";
+let countdown = 60;
+let timerInterval;
 
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+function startTimer() {
+  countdown = 60;
+  document.getElementById("resendBtn").classList.add("disabled");
+  document.getElementById("resendBtn").onclick = null;
+  
+  timerInterval = setInterval(() => {
+    countdown--;
+    document.getElementById("timer").innerText = `Resend code in ${countdown}s`;
+    
+    if(countdown <= 0) {
+      clearInterval(timerInterval);
+      document.getElementById("timer").innerText = "";
+      document.getElementById("resendBtn").classList.remove("disabled");
+      document.getElementById("resendBtn").onclick = resendOTP;
+      document.getElementById("resendBtn").innerText = "Didn't get code? Resend";
+    }
+  }, 1000);
 }
 
 function sendOTP() {
@@ -72,6 +102,7 @@ function sendOTP() {
       document.getElementById("step1").classList.add("hidden");
       document.getElementById("step2").classList.remove("hidden");
       document.getElementById("showEmail").innerText = email;
+      startTimer(); // START 60s COUNTDOWN
     })
     .catch((err) => {
       alert("Error: " + JSON.stringify(err));
@@ -80,14 +111,21 @@ function sendOTP() {
     });
 }
 
+function resendOTP() {
+  document.getElementById("message").innerText = "Sending new code...";
+  document.getElementById("message").style.color = "#8B5CF6";
+  sendOTP(); // SEND NEW OTP
+}
+
 function verifyOTP() {
   const userOTP = document.getElementById("otp").value;
   const msg = document.getElementById("message");
   
   if(userOTP === generatedOTP) {
+    clearInterval(timerInterval);
     msg.style.color = "#4ade80";
     msg.innerText = "✅ Verified! Welcome to LinkUp";
-    // ADD YOUR REDIRECT HERE: window.location.href = "dashboard.html";
+    // REDIRECT HERE: window.location.href = "dashboard.html";
   } else {
     msg.style.color = "#ef4444";
     msg.innerText = "❌ Wrong code. Please try again";
