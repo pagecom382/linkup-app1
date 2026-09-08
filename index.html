@@ -1,20 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LinkUp</title>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}body{background:#111b21;color:white;height:100vh}.auth-screen{position:fixed;inset:0;background:#111b21;display:flex;align-items:center;justify-content:center}.auth-box{width:92%;max-width:420px;background:#202c33;padding:30px;border-radius:15px}.logo{text-align:center;color:#25d366;font-size:34px;font-weight:bold}.input{width:100%;padding:14px;border:0;border-radius:8px;background:#2a3942;color:white;margin:12px 0}.button{width:100%;padding:14px;border:0;border-radius:8px;background:#25d366;color:#071b12;font-weight:bold}.hidden{display:none}.app{display:none;height:100vh}</style>
+  <title>LinkUp Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial; display: flex; justify-content: center; align-items: center; height: 100vh; background: #0a0a0a; color: white; }
+    .box { background: #1a1a1a; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px; }
+    input, button { width: 100%; padding: 14px; margin: 10px 0; border-radius: 8px; border: none; font-size: 16px; }
+    input { background: #2a2a2a; color: white; }
+    button { background: #25D366; color: white; font-weight: bold; cursor: pointer; }
+    button:disabled { background: #555; cursor: not-allowed; }
+    #recaptcha-container { margin: 10px 0; }
+  </style>
 </head>
 <body>
-<div class="auth-screen" id="authScreen"><div class="auth-box"><div class="logo">LinkUp</div><input class="input" id="countryCode" value="+234"><input class="input" id="phoneNumber" placeholder="8012345678"><button class="button" onclick="sendCode()">Send verification code</button><div id="recaptcha-container"></div></div></div>
-<div class="app" id="app"><h1 style="padding:20px">Welcome to LinkUp</h1></div>
-<script>
-const firebaseConfig={apiKey:"AIzaSyDyhQhEncYDaQscOtMrxz9Uj_-0-6XR-_s",authDomain:"linkup-chat-3fdd5.firebaseapp.com",databaseURL:"https://linkup-chat-3fdd5-default-rtdb.firebaseio.com",projectId:"linkup-chat-3fdd5"};
-firebase.initializeApp(firebaseConfig);const auth=firebase.auth();
-let confirmationResult;
-function sendCode(){const phone=document.getElementById("countryCode").value+document.getElementById("phoneNumber").value;const recaptcha=new firebase.auth.RecaptchaVerifier('recaptcha-container',{size:'invisible'});auth.signInWithPhoneNumber(phone,recaptcha).then(r=>{confirmationResult=r;alert("Code sent!")})}
-</script></body></html>
+  <div class="box">
+    <h2>LinkUp 🔥</h2>
+    <div id="step1">
+      <input type="tel" id="phone" placeholder="+2347067087764" value="+234">
+      <div id="recaptcha-container"></div>
+      <button id="sendBtn" onclick="sendOTP()">Send verification code</button>
+    </div>
+    <div id="step2" style="display:none">
+      <input type="text" id="code" placeholder="Enter 6 digit code">
+      <button onclick="verifyOTP()">Verify</button>
+    </div>
+    <p id="msg"></p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    let confirmationResult;
+
+    // Force invisible reCAPTCHA to load immediately
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+      'size': 'invisible',
+      'callback': () => { document.getElementById('sendBtn').disabled = false; }
+    });
+    recaptchaVerifier.render();
+
+    window.sendOTP = () => {
+      const phone = document.getElementById('phone').value;
+      document.getElementById('msg').innerText = "Sending...";
+      document.getElementById('sendBtn').disabled = true;
+      
+      signInWithPhoneNumber(auth, phone, window.recaptchaVerifier)
+        .then((result) => {
+          confirmationResult = result;
+          document.getElementById('step1').style.display = 'none';
+          document.getElementById('step2').style.display = 'block';
+          document.getElementById('msg').innerText = "Code sent! Check SMS";
+        }).catch((error) => {
+          document.getElementById('msg').innerText = "Error: " + error.message;
+          document.getElementById('sendBtn').disabled = false;
+          recaptchaVerifier.clear();
+          window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {'size': 'invisible'});
+        });
+    }
+
+    window.verifyOTP = () => {
+      const code = document.getElementById('code').value;
+      confirmationResult.confirm(code).then((result) => {
+        document.getElementById('msg').innerText = "Login Success! Welcome";
+      }).catch((error) => {
+        document.getElementById('msg').innerText = "Wrong code";
+      });
+    }
+  </script>
+</body>
+</html>
