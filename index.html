@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>LinkUp 🔮</title>
 
-<!-- Firebase Compat SDK - so your old code works -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
@@ -16,7 +15,6 @@
 :root{--green:#00a884;--dark:#111b21;--dark2:#202c33;--dark3:#182229;--text:#e9edef;--muted:#8696a0;--bubble:#005c4b}
 body{background:#0b141a;color:var(--text);height:100vh;overflow:hidden}
 button,input{font:inherit}button{border:0;cursor:pointer}.hidden{display:none!important}
-/* LOGIN */
 #authScreen{width:100%;height:100vh;display:flex;justify-content:center;align-items:center;background:#0b141a}
 .authBox{width:100%;max-width:420px;padding:30px}
 .logo{text-align:center;margin-bottom:35px}
@@ -29,7 +27,6 @@ button,input{font:inherit}button{border:0;cursor:pointer}.hidden{display:none!im
 .authCard input:focus{border-color:var(--green)}
 .primary{width:100%;background:var(--green);color:white;padding:14px;border-radius:8px;font-weight:bold}
 .switch{text-align:center;margin-top:18px;color:#00a884;cursor:pointer}
-/* APP */
 #app{height:100vh;display:flex}
 .sidebar{width:380px;min-width:320px;background:#111b21;border-right:1px solid #30383d;display:flex;flex-direction:column}
 .topbar{height:60px;background:#202c33;display:flex;align-items:center;justify-content:space-between;padding:0 15px}
@@ -49,7 +46,6 @@ button,input{font:inherit}button{border:0;cursor:pointer}.hidden{display:none!im
 .chatTime{color:var(--muted);font-size:12px}
 .lastMessage{color:var(--muted);font-size:14px;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .unread{background:var(--green);color:white;border-radius:50%;min-width:20px;height:20px;font-size:11px;display:flex;align-items:center;justify-content:center}
-/* CHAT */
 .chat{flex:1;display:flex;flex-direction:column;background:#0b141a}
 .chatHeader{height:60px;background:#202c33;display:flex;align-items:center;padding:0 15px;gap:12px}
 .backBtn{display:none;background:none;color:white;font-size:22px}
@@ -61,10 +57,10 @@ button,input{font:inherit}button{border:0;cursor:pointer}.hidden{display:none!im
 .messageRow{display:flex;margin-bottom:6px}
 .messageRow.me{justify-content:flex-end}
 .bubble{max-width:70%;padding:7px 9px;border-radius:8px;background:#202c33;position:relative;word-wrap:break-word}
-.me.bubble{background:#005c4b}
+.messageRow.me.bubble{background:#005c4b}
 .messageText{font-size:14.5px;line-height:1.4;padding-right:45px}
 .messageMeta{float:right;margin-left:8px;margin-top:4px;color:#8696a0;font-size:10px}
-.me.messageMeta{color:#9fc7bd}
+.messageRow.me.messageMeta{color:#9fc7bd}
 .read{color:#53bdeb!important}
 .composer{min-height:62px;background:#202c33;display:flex;align-items:center;gap:8px;padding:9px 12px}
 .composer input{flex:1;background:#2a3942;border:0;color:white;padding:12px 15px;border-radius:22px;outline:none}
@@ -82,7 +78,6 @@ button,input{font:inherit}button{border:0;cursor:pointer}.hidden{display:none!im
 </head>
 <body>
 
-<!-- AUTH -->
 <section id="authScreen">
 <div class="authBox">
 <div class="logo"><div class="logoIcon">💬</div><h1>LinkUp</h1><p>Simple. Fast. Private.</p></div>
@@ -91,28 +86,24 @@ button,input{font:inherit}button{border:0;cursor:pointer}.hidden{display:none!im
 <div id="registerForm" class="hidden"><h2>Create account</h2><input id="registerName" type="text" placeholder="Your name"><input id="registerEmail" type="email" placeholder="Email"><input id="registerPassword" type="password" placeholder="Password"><button class="primary" onclick="register()">Create account</button><div class="switch" onclick="showLogin()">Already have an account?</div></div>
 </div></div></section>
 
-<!-- MAIN APP -->
 <section id="app" class="hidden">
 <aside class="sidebar">
 <div class="topbar"><div class="profileArea"><div class="avatar" id="myAvatar">👤</div><strong id="myName">LinkUp</strong></div><div class="icons"><button class="iconBtn" onclick="openNewChat()">✚</button><button class="iconBtn" onclick="logout()">⋮</button></div></div>
-<div class="searchBox"><input id="searchInput" class="search" placeholder="Search or start new chat" oninput="searchUsers()"></div>
+<div class="searchBox"><input id="searchInput" class="search" placeholder="Search or start new chat"></div>
 <div id="chatList" class="chatList"><div class="empty">No chats yet.<br>Start a conversation.</div></div>
 </aside>
 
 <main id="chatPanel" class="chat">
-<div class="chatHeader"><button class="backBtn" onclick="closeChat()">‹</button><div class="avatar" id="chatAvatar">👤</div><div class="chatUser"><div class="chatUserName" id="chatName">Select a chat</div><div class="chatStatus" id="chatStatus">online</div></div><button class="iconBtn" onclick="alert('Calling coming soon')">📞</button><button class="iconBtn">⋮</button></div>
+<div class="chatHeader"><button class="backBtn" onclick="closeChat()">‹</button><div class="avatar" id="chatAvatar">👤</div><div class="chatUser"><div class="chatUserName" id="chatName">Select a chat</div><div class="chatStatus" id="chatStatus">online</div></div><button class="iconBtn">📞</button><button class="iconBtn">⋮</button></div>
 <div id="messages" class="messages"><div class="empty"><div><h2>Welcome to LinkUp</h2><p>Select a chat to start messaging.</p></div></div></div>
-<div class="composer"><button class="iconBtn" onclick="document.getElementById('fileInput').click()">📎</button><input id="messageInput" placeholder="Type a message" autocomplete="off" onkeydown="if(event.key==='Enter')sendMessage()"><input id="fileInput" type="file" class="hidden" accept="image/*" onchange="sendImage(event)"><button class="sendBtn" onclick="sendMessage()">➤</button></div>
+<div class="composer"><button class="iconBtn">📎</button><input id="messageInput" placeholder="Type a message" autocomplete="off" onkeydown="if(event.key==='Enter')sendMessage()"><input id="fileInput" type="file" class="hidden" accept="image/*"><button class="sendBtn" onclick="sendMessage()">➤</button></div>
 </main>
-
 <div id="welcomePanel" class="welcome"><div class="welcomeIcon">💬</div><h1>LinkUp Web</h1><p>Send and receive messages in real time.</p></div>
 </section>
 
-<!-- NEW CHAT MODAL -->
 <div id="newChatModal" class="modal hidden"><div class="modalBox"><h2>Find a user</h2><input id="userSearch" placeholder="Enter email address"><button class="primary" onclick="findUser()">Find user</button><div id="userResult"></div><button class="closeBtn" onclick="closeNewChat()">Cancel</button></div></div>
 
 <script>
-/* YOUR FIREBASE CONFIG - ALREADY FILLED */
 const firebaseConfig = {
   apiKey: "AIzaSyDyhQhEncYDaQscOtMrxz9Uj_-0-6XR-_s",
   authDomain: "linkup-chat-3fdd5.firebaseapp.com",
@@ -127,7 +118,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-const storage = firebase.storage();
 
 let currentUser = null;
 let currentChatUser = null;
@@ -136,6 +126,11 @@ let unsubscribeChats = null;
 
 auth.onAuthStateChanged(async user => {
     if(user){
+        if(!user.emailVerified){
+            alert("Please verify your email first. Check your inbox.");
+            await auth.signOut();
+            return;
+        }
         currentUser = user;
         await createUserDocument();
         document.getElementById("authScreen").classList.add("hidden");
@@ -153,7 +148,14 @@ async function login(){
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value;
     if(!email ||!password){alert("Enter email and password.");return;}
-    try{await auth.signInWithEmailAndPassword(email,password);}catch(e){alert(e.message);}
+    try{
+        const result = await auth.signInWithEmailAndPassword(email,password);
+        if(!result.user.emailVerified){
+            alert("Please verify your email first. Check your inbox/spam.");
+            await auth.signOut();
+            return;
+        }
+    }catch(e){alert(e.message);}
 }
 
 async function register(){
@@ -164,11 +166,20 @@ async function register(){
     if(password.length < 6){alert("Password must be 6+ characters.");return;}
     try{
         const result = await auth.createUserWithEmailAndPassword(email,password);
+
+        // SEND VERIFICATION EMAIL
+        await result.user.sendEmailVerification();
+
         await db.collection("users").doc(result.user.uid).set({
-            uid:result.user.uid,name:name,email:email.toLowerCase(),photoURL:"",online:true,
+            uid:result.user.uid,name:name,email:email.toLowerCase(),photoURL:"",online:false,verified:false,
             lastSeen:firebase.firestore.FieldValue.serverTimestamp(),
             createdAt:firebase.firestore.FieldValue.serverTimestamp()
         });
+
+        alert("Account created! We don send verification link to your email. Click am before you login.");
+        await auth.signOut();
+        showLogin();
+
     }catch(e){alert(e.message);}
 }
 
@@ -178,10 +189,12 @@ async function createUserDocument(){
     if(!snap.exists){
         await ref.set({
             uid:currentUser.uid,name:currentUser.displayName||currentUser.email.split("@")[0],
-            email:currentUser.email.toLowerCase(),photoURL:"",online:true,
+            email:currentUser.email.toLowerCase(),photoURL:"",online:true,verified:true,
             lastSeen:firebase.firestore.FieldValue.serverTimestamp(),
             createdAt:firebase.firestore.FieldValue.serverTimestamp()
         });
+    }else{
+        await ref.update({online:true,verified:true});
     }
 }
 
@@ -247,11 +260,7 @@ function renderMessage(msg){
     row.className = "messageRow " + (msg.senderId === currentUser.uid? "me" : "");
     const bubble = document.createElement("div");
     bubble.className = "bubble";
-    if(msg.type === "image"){
-        bubble.innerHTML = `<img src="${msg.imageURL}" style="max-width:250px;border-radius:8px"><div class="messageMeta">${formatTime(msg.createdAt)} ${msg.senderId===currentUser.uid?'<span class="read">✓✓</span>':''}</div>`;
-    }else{
-        bubble.innerHTML = `<div class="messageText">${escapeHTML(msg.text)}</div><div class="messageMeta">${formatTime(msg.createdAt)} ${msg.senderId===currentUser.uid?'<span class="read">✓</span>':''}</div>`;
-    }
+    bubble.innerHTML = `<div class="messageText">${escapeHTML(msg.text)}</div><div class="messageMeta">${formatTime(msg.createdAt)} ${msg.senderId===currentUser.uid?'<span class="read">✓</span>':''}</div>`;
     row.appendChild(bubble);messages.appendChild(row);
 }
 
@@ -275,8 +284,6 @@ function sendMessage(){
     input.value = "";
 }
 
-function sendImage(e){alert("Image upload coming next boss");}
-
 function loadChats(){
     if(unsubscribeChats)unsubscribeChats();
     unsubscribeChats = db.collection("chats").where("users","array-contains",currentUser.uid).orderBy("updatedAt","desc").onSnapshot(snap => {
@@ -293,7 +300,6 @@ function loadChats(){
         });
     });
 }
-function searchUsers(){}
 </script>
 </body>
   </html>
