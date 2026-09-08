@@ -4,45 +4,49 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LinkUp - Email Verification</title>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
-  body { font-family: Arial; background: #0a0a0a; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; }
-  .box { background: #1a1a1a; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px; }
-  input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #222; color: white; }
-  button { width: 100%; padding: 12px; background: #8B5CF6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-  button:disabled { background: #555; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial; background: #0a0a0a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+  .box { background: #1a1a1a; padding: 35px 25px; border-radius: 20px; width: 100%; max-width: 420px; box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
+  h2 { text-align: center; margin-bottom: 10px; color: #8B5CF6; }
+  p { text-align: center; font-size: 14px; color: #aaa; margin-bottom: 20px; }
+  input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; border: 1px solid #333; background: #222; color: white; font-size: 15px; }
+  input:focus { outline: 2px solid #8B5CF6; }
+  button { width: 100%; padding: 14px; background: #8B5CF6; color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
+  button:disabled { background: #555; cursor: not-allowed; }
   .hidden { display: none; }
+  #message { text-align: center; margin-top: 15px; font-weight: bold; }
 </style>
 </head>
 <body>
 
 <div class="box">
   <h2>LinkUp 🔮</h2>
+  <p>Connect with destiny</p>
   
-  <!-- STEP 1: ENTER EMAIL -->
   <div id="step1">
-    <p>Enter your email to get verification code</p>
-    <input type="email" id="email" placeholder="your@email.com" required>
-    <button onclick="sendOTP()">Send Code</button>
+    <input type="email" id="email" placeholder="Enter your email" required>
+    <button onclick="sendOTP()">Send Verification Code</button>
   </div>
 
-  <!-- STEP 2: ENTER CODE -->
   <div id="step2" class="hidden">
-    <p>We sent code to <b id="showEmail"></b></p>
+    <p>We sent 6-digit code to <b id="showEmail" style="color:#8B5CF6"></b></p>
     <input type="text" id="otp" placeholder="Enter 6 digit code" maxlength="6">
-    <button onclick="verifyOTP()">Verify</button>
+    <button onclick="verifyOTP()">Verify & Continue</button>
     <p id="message"></p>
   </div>
 </div>
 
 <script>
-// YOUR EMAILJS KEYS - ALREADY PLUGGED IN
-emailjs.init("KjEOuOylcmZSiRElm");
+// YOUR EMAILJS KEYS - ALREADY CONFIGURED
+(function(){ emailjs.init("KjEOuOylcmZSiRElm"); })();
 
 const SERVICE_ID = "service_uc66is9";
-const TEMPLATE_ID = "9nwkcll";
+const TEMPLATE_ID = "template_7itzm37";
 
 let generatedOTP = "";
+let userEmail = "";
 
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -50,8 +54,9 @@ function generateOTP() {
 
 function sendOTP() {
   const email = document.getElementById("email").value;
-  if(!email) return alert("Please enter email");
+  if(!email) return alert("Please enter your email");
   
+  userEmail = email;
   generatedOTP = generateOTP();
   
   const templateParams = {
@@ -59,15 +64,19 @@ function sendOTP() {
     code: generatedOTP
   };
 
+  document.querySelector("#step1 button").disabled = true;
+  document.querySelector("#step1 button").innerText = "Sending...";
+
   emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
     .then(() => {
       document.getElementById("step1").classList.add("hidden");
       document.getElementById("step2").classList.remove("hidden");
       document.getElementById("showEmail").innerText = email;
-      alert("Code sent! Check your email");
     })
     .catch((err) => {
       alert("Error: " + JSON.stringify(err));
+      document.querySelector("#step1 button").disabled = false;
+      document.querySelector("#step1 button").innerText = "Send Verification Code";
     });
 }
 
@@ -76,11 +85,12 @@ function verifyOTP() {
   const msg = document.getElementById("message");
   
   if(userOTP === generatedOTP) {
-    msg.style.color = "green";
-    msg.innerText = "✅ Verified! You can continue to LinkUp";
+    msg.style.color = "#4ade80";
+    msg.innerText = "✅ Verified! Welcome to LinkUp";
+    // ADD YOUR REDIRECT HERE: window.location.href = "dashboard.html";
   } else {
-    msg.style.color = "red";
-    msg.innerText = "❌ Wrong code. Try again";
+    msg.style.color = "#ef4444";
+    msg.innerText = "❌ Wrong code. Please try again";
   }
 }
 </script>
