@@ -6,34 +6,88 @@
   <title>LINKup</title>
   <meta name="theme-color" content="#8b5cf6">
   <style>
-    body { background: #8b5cf6; margin:0; font-family:sans-serif; }
-   .login-box { background: white; margin: 100px auto; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; }
+    * { margin:0; padding:0; font-family:sans-serif; }
+    body { background: #8b5cf6; height:100vh; }
+   .screen { display: none; height:100vh; flex-direction: column; }
+   .screen.active { display: flex; }
+   .login-box { background: white; margin: auto; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; }
    input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; }
    button { width: 100%; padding: 12px; background: #8b5cf6; color: white; border: none; border-radius: 10px; font-weight: bold; }
-   #status { color:red; margin-top:10px; font-size:14px; }
+   .header { background: #7c3aed; color: white; padding: 15px; text-align: center; font-size: 20px; font-weight: bold; position:relative; }
+   .logout { position:absolute; right:15px; top:15px; font-size:14px; cursor:pointer; }
+   .add-contact { padding: 10px; background: white; display: flex; gap: 8px; }
+   .add-contact input { flex: 1; }
+   .add-contact button { width: 80px; }
+   .contacts { background: white; padding: 10px; display: flex; gap: 10px; overflow-x: auto; }
+   .contact { background: #eee; padding: 8px 15px; border-radius: 20px; cursor: pointer; white-space:nowrap; }
+   .contact.active { background: #8b5cf6; color: white; }
+   .chat-area { flex: 1; background: #e5ddd5; padding: 15px; overflow-y: auto; }
+   .msg { margin: 8px 0; display: flex; }
+   .msg.you { justify-content: flex-end; }
+   .bubble { max-width: 75%; padding: 10px 14px; border-radius: 12px; background: white; }
+   .msg.you .bubble { background: #dcf8c6; }
+   .input-area { background: white; padding: 10px; display: flex; gap: 8px; }
+   .input-area input { flex: 1; padding: 12px; border-radius: 25px; }
+   .input-area button { width: 45px; border-radius: 50%; font-size:20px; }
   </style>
 </head>
 <body>
+
+<!-- LOGIN SCREEN -->
+<div class="screen active" id="loginScreen">
   <div class="login-box">
     <h2>LINKup 💜</h2>
     <input id="email" type="email" placeholder="Email" value="maroejiata02@gmail.com">
-    <input id="password" type="password" placeholder="Password" value="123456">
+    <input id="password" type="password" placeholder="Password" value="linkup123">
     <button onclick="login()">Continue</button>
-    <p id="status"></p>
+    <p id="status" style="color:red; margin-top:10px;"></p>
   </div>
+</div>
+
+<!-- CHAT SCREEN -->
+<div class="screen" id="chatScreen">
+  <div class="header">LINKup 💜 <span class="logout" onclick="logout()">Logout</span></div>
+  <div class="add-contact">
+    <input id="newContact" placeholder="Add friend email">
+    <button onclick="addContact()">Add</button>
+  </div>
+  <div class="contacts" id="contacts"></div>
+  <div class="chat-area" id="chatArea"><p style="text-align:center; color:#666;">Add a contact to start chatting</p></div>
+  <div class="input-area">
+    <input id="msgInput" placeholder="Type a message" onkeypress="if(event.key==='Enter') sendMessage()">
+    <button onclick="sendMessage()">➤</button>
+  </div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDyhQhEncYDaQscOtMrxz9Uj_-0-6XR-_s",
   authDomain: "linkup-chat-3fdd5.firebaseapp.com",
+  databaseURL: "https://linkup-chat-3fdd5-default-rtdb.firebaseio.com",
   projectId: "linkup-chat-3fdd5"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getDatabase(app);
+
+let currentUser = null;
+let contacts = [];
+let activeContact = null;
+
+// THIS IS THE MAGIC: AUTO SWITCH WHEN LOGIN
+onAuthStateChanged(auth, user => {
+  if(user){
+    currentUser = user;
+    document.getElementById('loginScreen').classList.remove('active');
+    document.getElementById('chatScreen').classList.add('active');
+    loadContacts();
+  }
+});
 
 window.login = async function(){
   let email = document.getElementById('email').value;
@@ -41,15 +95,50 @@ window.login = async function(){
   document.getElementById('status').innerText = "Logging in...";
   try{
     await createUserWithEmailAndPassword(auth, email, pass);
-    document.getElementById('status').innerText = "Account Created! Refresh page";
+    document.getElementById('status').innerText = "Account Created!";
   } catch(e){
-    document.getElementById('status').innerText = "Error 1: " + e.code + " - " + e.message;
-    try{
-      await signInWithEmailAndPassword(auth, email, pass);
-      document.getElementById('status').innerText = "Login Success! Refresh page";
-    } catch(err){
-      document.getElementById('status').innerText = "Error 2: " + err.code + " - " + err.message;
-    }
+    await signInWithEmailAndPassword(auth, email, pass);
+  }
+}
+
+window.logout = function(){ signOut(auth); }
+
+window.addContact = function(){
+  let email = document.getElementById('newContact').value;
+  if(email && currentUser){ 
+    set(ref(db, 'users/' + currentUser.uid + '/contacts/' + btoa(email)), email); 
+    document.getElementById('newContact').value = ""; 
+  }
+}
+
+function loadContacts(){
+  onValue(ref(db, 'users/' + currentUser.uid + '/contacts'), snap => {
+    contacts = snap.val() ? Object.values(snap.val()) : [];
+    let html = "";
+    contacts.forEach(c => { html += `<div class="contact" onclick="selectContact('${c}')">${c}</div>`; });
+    document.getElementById('contacts').innerHTML = html;
+  });
+}
+
+window.selectContact = function(email){
+  activeContact = email;
+  onValue(ref(db, 'chats/' + chatId()), snap => {
+    let html = "";
+    snap.forEach(child => {
+      let m = child.val();
+      html += `<div class="msg ${m.sender===currentUser.email?'you':''}"><div class="bubble">${m.text}</div></div>`;
+    });
+    document.getElementById('chatArea').innerHTML = html || "<p style='text-align:center;color:#666;'>Say Hi!</p>";
+  });
+}
+
+function chatId(){ return btoa([currentUser.email, activeContact].sort().join("_")); }
+
+window.sendMessage = function(){
+  let text = document.getElementById('msgInput').value;
+  if(text && activeContact){
+    push(ref(db, 'chats/' + chatId()), { sender: currentUser.email, text: text });
+    document.getElementById('msgInput').value = "";
   }
 }
 </script>
