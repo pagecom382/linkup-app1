@@ -10,41 +10,120 @@
   <link rel="apple-touch-icon" href="/Chathura.png">
   <meta name="theme-color" content="#8b5cf6">
   <style>
-    body {
-      margin: 0;
-      background: #8b5cf6;
-      color: white;
-      font-family: sans-serif;
-      display: flex;
+    * { box-sizing: border-box; font-family: sans-serif; }
+    body { margin: 0; background: #f3f0ff; }
+   .header {
+      background: #8b5cf6; color: white; padding: 15px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+   .btn { background: white; color: #8b5cf6; border: none; padding: 8px 15px; border-radius: 10px; font-weight: bold; }
+   .friends { padding: 10px; }
+   .friend {
+      background: white; padding: 12px; margin-bottom: 10px;
+      border-radius: 12px; display: flex; justify-content: space-between;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+   .chat-box {
+      display: none; position: fixed; bottom: 0; left: 0; right: 0;
+      height: 80vh; background: white; border-radius: 20px 20px 0 0;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
     }
-    h1 { font-size: 2.5rem; margin-bottom: 10px; }
-    button {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 12px;
-      background: white;
-      color: #8b5cf6;
-      font-weight: bold;
-      font-size: 1rem;
-      margin-top: 20px;
-    }
+   .chat-header { background: #8b5cf6; color: white; padding: 15px; border-radius: 20px 20px 0 0; }
+   .messages { flex: 1; padding: 15px; overflow-y: auto; }
+   .msg { background: #e9e5ff; padding: 10px; border-radius: 10px; margin-bottom: 8px; max-width: 70%; }
+   .msg.me { background: #8b5cf6; color: white; margin-left: auto; }
+   .chat-input { display: flex; padding: 10px; border-top: 1px solid #ddd; }
+   .chat-input input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 10px; }
+   .chat-input button { margin-left: 10px; background: #8b5cf6; color: white; border: none; padding: 10px 15px; border-radius: 10px; }
   </style>
 </head>
 <body>
-  <h1>LINKup 💜</h1>
-  <p>Connect with your friends</p>
-  <button onclick="alert('Welcome to LINKup!')">Get Started</button>
+  <div class="header">
+    <h2>LINKup 💜</h2>
+    <button class="btn" onclick="addFriend()">+ Add Person</button>
+  </div>
+
+  <div class="friends" id="friendsList">
+    <p style="text-align:center; color:#666;">No friends yet. Tap + Add Person</p>
+  </div>
+
+  <!-- CHAT BOX -->
+  <div class="chat-box" id="chatBox">
+    <div class="chat-header">
+      <span id="chatWith"></span>
+      <button onclick="closeChat()" style="float:right; background:none; border:none; color:white; font-size:20px;">x</button>
+    </div>
+    <div class="messages" id="messages"></div>
+    <div class="chat-input">
+      <input type="text" id="msgInput" placeholder="Type message...">
+      <button onclick="sendMsg()">Send</button>
+    </div>
+  </div>
 
   <script>
+    let friends = JSON.parse(localStorage.getItem('linkupFriends')) || [];
+    let currentChat = null;
+
+    function saveFriends() {
+      localStorage.setItem('linkupFriends', JSON.stringify(friends));
+    }
+
+    function addFriend() {
+      let name = prompt("Enter person's name:");
+      if(name) {
+        friends.push({name: name, messages: []});
+        saveFriends();
+        loadFriends();
+      }
+    }
+
+    function loadFriends() {
+      let list = document.getElementById('friendsList');
+      if(friends.length === 0) {
+        list.innerHTML = '<p style="text-align:center; color:#666;">No friends yet. Tap + Add Person</p>';
+        return;
+      }
+      list.innerHTML = friends.map((f, i) => `
+        <div class="friend">
+          <span>${f.name}</span>
+          <button class="btn" onclick="openChat(${i})">Message</button>
+        </div>
+      `).join('');
+    }
+
+    function openChat(index) {
+      currentChat = index;
+      document.getElementById('chatBox').style.display = 'flex';
+      document.getElementById('chatWith').innerText = friends[index].name;
+      loadMessages();
+    }
+
+    function closeChat() {
+      document.getElementById('chatBox').style.display = 'none';
+    }
+
+    function loadMessages() {
+      let msgs = friends[currentChat].messages;
+      document.getElementById('messages').innerHTML = msgs.map(m =>
+        `<div class="msg ${m.me? 'me' : ''}">${m.text}</div>`
+      ).join('');
+    }
+
+    function sendMsg() {
+      let input = document.getElementById('msgInput');
+      if(input.value.trim() === '') return;
+      friends[currentChat].messages.push({text: input.value, me: true});
+      saveFriends();
+      loadMessages();
+      input.value = '';
+    }
+
     // REGISTER SERVICE WORKER
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js');
     }
+
+    loadFriends();
   </script>
 </body>
 </html>
