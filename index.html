@@ -1,86 +1,217 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>LinkUp Login</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { font-family: Arial; display: flex; justify-content: center; align-items: center; height: 100vh; background: #0a0a0a; color: white; margin: 0; }
-    .box { background: #1a1a1a; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px; }
-    input, button { width: 100%; padding: 14px; margin: 10px 0; border-radius: 8px; border: none; font-size: 16px; box-sizing: border-box; }
-    input { background: #2a2a2a; color: white; }
-    button { background: #25D366; color: white; font-weight: bold; cursor: pointer; }
-    button:disabled { background: #555; cursor: not-allowed; }
-    #msg { text-align: center; margin-top: 10px; color: #25D366; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinkUp</title>
+<style>
+  :root {
+    --linkup-primary: #7C3AED;  /* Purple */
+    --linkup-dark: #0b0814;     /* Dark bg */
+    --linkup-chat: #16122a;     /* Chat bg */
+    --linkup-bubble-me: #7C3AED;
+    --linkup-bubble-other: #2d2942;
+    --text: #e9e9e9;
+  }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+
+  body {
+    background: var(--linkup-dark);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    background: var(--linkup-primary);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .topbar img {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #fff;
+  }
+  .topbar .info b { font-size: 16px; }
+  .topbar .info small { font-size: 12px; opacity: 0.8; }
+
+  /* CHAT AREA */
+  .chat-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    background: var(--linkup-chat);
+    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%237C3AED' fill-opacity='0.05' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  .message {
+    display: flex;
+    margin-bottom: 8px;
+  }
+  .bubble {
+    max-width: 70%;
+    padding: 10px 14px;
+    border-radius: 12px;
+    line-height: 1.4;
+    font-size: 15px;
+  }
+  .me {
+    justify-content: flex-end;
+  }
+  .me .bubble {
+    background: var(--linkup-bubble-me);
+    border-radius: 12px 0 12px 12px;
+  }
+  .other {
+    justify-content: flex-start;
+  }
+  .other .bubble {
+    background: var(--linkup-bubble-other);
+    border-radius: 0 12px 12px 12px;
+  }
+  .time {
+    font-size: 11px;
+    opacity: 0.6;
+    margin-left: 6px;
+  }
+
+  /* INPUT BAR */
+  .input-bar {
+    display: flex;
+    padding: 10px;
+    background: #1e1b2e;
+    gap: 8px;
+  }
+  .input-bar input {
+    flex: 1;
+    border: none;
+    border-radius: 24px;
+    padding: 12px 18px;
+    background: var(--linkup-bubble-other);
+    color: var(--text);
+    font-size: 15px;
+    outline: none;
+  }
+  .input-bar button {
+    background: var(--linkup-primary);
+    border: none;
+    border-radius: 50%;
+    width: 46px;
+    height: 46px;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  .input-bar button:active { transform: scale(0.95); }
+
+  /* LOGIN SCREEN */
+  .login {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    gap: 20px;
+    padding: 20px;
+  }
+  .login h1 { color: var(--linkup-primary); }
+  .login input {
+    width: 100%;
+    max-width: 300px;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid #3a3652;
+    background: var(--linkup-bubble-other);
+    color: var(--text);
+    font-size: 16px;
+  }
+  .login button {
+    width: 100%;
+    max-width: 300px;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: var(--linkup-primary);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+</style>
 </head>
 <body>
-  <div class="box">
-    <h2 style="text-align:center">LinkUp 🔥</h2>
-    <div id="step1">
-      <input type="tel" id="phone" placeholder="+2347067087764" value="+234">
-      <div id="recaptcha-container"></div>
-      <button id="sendBtn" onclick="sendOTP()">Send verification code</button>
+
+<!-- LOGIN SCREEN -->
+<div class="login" id="loginScreen">
+  <h1>LinkUp</h1>
+  <input type="tel" id="phone" placeholder="+2347067087764">
+  <input type="text" id="code" placeholder="Enter code: 123456">
+  <button onclick="login()">Verify & Login</button>
+</div>
+
+<!-- CHAT SCREEN -->
+<div id="chatScreen" style="display:none; flex-direction:column; height:100vh;">
+  <div class="topbar">
+    <img src="https://i.pravatar.cc/100">
+    <div class="info">
+      <b>LinkUp Friend</b>
+      <small>online</small>
     </div>
-    <div id="step2" style="display:none">
-      <input type="text" id="code" placeholder="Enter 6 digit code" maxlength="6">
-      <button onclick="verifyOTP()">Verify</button>
-    </div>
-    <p id="msg"></p>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+  <div class="chat-area" id="chatArea">
+    <div class="message other">
+      <div class="bubble">Hey! LinkUp dey work now 🔥<span class="time">10:30</span></div>
+    </div>
+    <div class="message me">
+      <div class="bubble">Yes bro! Our own purple own 😎<span class="time">10:31</span></div>
+    </div>
+  </div>
 
-    // YOUR REAL CONFIG
-    const firebaseConfig = {
-      apiKey: "AIzaSyDyhQhEncYDaQscOtMrxz9Uj_-0-6XR-_s",
-      authDomain: "linkup-chat-3fdd5.firebaseapp.com",
-      databaseURL: "https://linkup-chat-3fdd5-default-rtdb.firebaseio.com",
-      projectId: "linkup-chat-3fdd5",
-      storageBucket: "linkup-chat-3fdd5.firebasestorage.app",
-      messagingSenderId: "177573067619",
-      appId: "1:177573067619:web:40e64ae330bb86200e7156",
-      measurementId: "G-Q73V61VYEQ"
-    };
+  <div class="input-bar">
+    <input type="text" id="msgInput" placeholder="Message">
+    <button onclick="sendMsg()">➤</button>
+  </div>
+</div>
 
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const auth = getAuth(app);
-    let confirmationResult;
-
-    // Invisible reCAPTCHA
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-      'size': 'invisible'
-    });
-
-    window.sendOTP = () => {
-      const phone = document.getElementById('phone').value;
-      document.getElementById('msg').innerText = "Sending...";
-      document.getElementById('sendBtn').disabled = true;
-      
-      signInWithPhoneNumber(auth, phone, window.recaptchaVerifier)
-        .then((result) => {
-          confirmationResult = result;
-          document.getElementById('step1').style.display = 'none';
-          document.getElementById('step2').style.display = 'block';
-          document.getElementById('msg').innerText = "Code sent! Check SMS";
-        }).catch((error) => {
-          document.getElementById('msg').innerText = "Error: " + error.message;
-          document.getElementById('sendBtn').disabled = false;
-          window.recaptchaVerifier.clear();
-        });
+<script>
+  function login() {
+    let phone = document.getElementById('phone').value;
+    let code = document.getElementById('code').value;
+    
+    // For now just fake login. Later connect your Firebase here
+    if(code === "123456") {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('chatScreen').style.display = 'flex';
+    } else {
+      alert("Wrong code! Use 123456 for testing");
     }
+  }
 
-    window.verifyOTP = () => {
-      const code = document.getElementById('code').value;
-      confirmationResult.confirm(code).then((result) => {
-        document.getElementById('msg').innerText = "Login Success! Welcome to LinkUp";
-      }).catch((error) => {
-        document.getElementById('msg').innerText = "Wrong code: " + error.message;
-      });
-    }
-  </script>
+  function sendMsg() {
+    let input = document.getElementById('msgInput');
+    let msg = input.value;
+    if(msg.trim() === "") return;
+    
+    let chatArea = document.getElementById('chatArea');
+    let time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    
+    chatArea.innerHTML += `
+      <div class="message me">
+        <div class="bubble">${msg}<span class="time">${time}</span></div>
+      </div>
+    `;
+    input.value = "";
+    chatArea.scrollTop = chatArea.scrollHeight;
+  }
+</script>
+
 </body>
 </html>
