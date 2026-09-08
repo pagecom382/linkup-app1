@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#8B5CF6">
 <title>LinkUp 🔮</title>
+<link rel="manifest" href="/manifest.json"> <!-- PWA LINE -->
+<link rel="apple-touch-icon" href="/icon-192.png">
 
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -92,6 +95,9 @@ button,input{font:inherit}button{border:0;cursor:pointer}.hidden{display:none!im
 <div id="newChatModal" class="modal hidden"><div class="modalBox"><h2>Add by User ID</h2><input id="userSearch" placeholder="Enter User ID e.g LU_8F3K2P"><button class="primary" onclick="findUser()">Find User</button><div id="userResult"></div><button class="closeBtn" onclick="closeNewChat()">Cancel</button></div></div>
 
 <script>
+// REGISTER SERVICE WORKER FOR PWA
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js');}
+
 const firebaseConfig = {
   apiKey: "AIzaSyDyhQhEncYDaQscOtMrxz9Uj_-0-6XR-_s",
   authDomain: "linkup-chat-3fdd5.firebaseapp.com",
@@ -144,7 +150,7 @@ async function register(){
     if(password.length < 6){alert("Password must be 6+ characters.");return;}
     try{
         const result = await auth.createUserWithEmailAndPassword(email,password);
-        await result.user.sendEmailVerification(); // SEND VERIFICATION EMAIL
+        await result.user.sendEmailVerification();
 
         myUserId = generateUserId();
         await db.collection("users").doc(result.user.uid).set({
@@ -243,4 +249,4 @@ function loadChats(){
 }
 </script>
 </body>
-  </html>
+    </html>
