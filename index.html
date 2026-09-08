@@ -2,185 +2,37 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LinkUp Chat</title>
-<style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto; }
-  body { background: #0b141a; color: #e9edef; height: 100vh; overflow: hidden; }
-  
-  /* HEADER */
-  .header { background: #202c33; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-  .header h1 { font-size: 22px; font-weight: 700; color: #e9edef; }
-  .header-icons { display: flex; gap: 20px; font-size: 22px; }
-  
-  /* SEARCH */
-  .search { padding: 8px 12px; background: #202c33; }
-  .search input { width: 100%; padding: 10px; border-radius: 20px; border: none; background: #2a3942; color: white; outline: none; }
-  
-  /* FILTERS */
-  .filters { display: flex; gap: 8px; padding: 10px 12px; background: #111b21; overflow-x: auto; }
-  .filter { padding: 6px 12px; border-radius: 20px; background: #2a3942; font-size: 14px; cursor: pointer; }
-  .filter.active { background: #005c4b; color: white; }
-  
-  /* CHAT LIST */
-  .chat-list { height: calc(100vh - 180px); overflow-y: auto; background: #111b21; }
-  .chat-item { display: flex; padding: 12px; gap: 12px; cursor: pointer; border-bottom: 1px solid #2a3942; }
-  .chat-item:hover { background: #202c33; }
-  .avatar { width: 50px; height: 50px; border-radius: 50%; background: #8B5CF6; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 20px; }
-  .chat-info { flex: 1; }
-  .chat-top { display: flex; justify-content: space-between; }
-  .chat-name { font-weight: 600; font-size: 16px; }
-  .chat-time { font-size: 12px; color: #aebac1; }
-  .chat-msg { font-size: 14px; color: #aebac1; margin-top: 3px; }
-  .badge { background: #25D366; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; display: flex; justify-content: center; align-items: center; }
-  
-  /* BOTTOM NAV */
-  .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #202c33; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #2a3942; }
-  .nav-item { text-align: center; font-size: 12px; color: #aebac1; }
-  .nav-item.active { color: #8B5CF6; }
-  .nav-icon { font-size: 24px; }
-  
-  /* FLOATING BUTTON */
-  .fab { position: fixed; bottom: 80px; right: 20px; width: 55px; height: 55px; background: #8B5CF6; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 28px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
-</style>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LinkUp</title>
+<style>*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto}body{background:#0b141a;color:#e9edef;height:100vh;overflow:hidden}.screen{display:none;height:100vh;flex-direction:column}.screen.active{display:flex}.header{background:#202c33;padding:15px;display:flex;justify-content:space-between;align-items:center}h1{font-size:22px;font-weight:700}.search{padding:8px 12px;background:#202c33}input{width:100%;padding:10px;border-radius:20px;border:none;background:#2a3942;color:#fff;outline:none}.filters{display:flex;gap:8px;padding:10px 12px;background:#111b21;overflow-x:auto}.filter{padding:6px 12px;border-radius:20px;background:#2a3942;font-size:14px;cursor:pointer}.filter.active{background:#8B5CF6}.chat-list{flex:1;overflow-y:auto;background:#111b21;padding-bottom:70px}.chat-item{display:flex;padding:12px;gap:12px;cursor:pointer;border-bottom:1px solid #2a3942}.chat-item:active{background:#202c33}.avatar{width:50px;height:50px;border-radius:50%;background:#8B5CF6;display:flex;justify-content:center;align-items:center;font-weight:bold;font-size:20px;flex-shrink:0}.chat-info{flex:1;overflow:hidden}.chat-top{display:flex;justify-content:space-between}.chat-name{font-weight:600;font-size:16px}.chat-time{font-size:12px;color:#aebac1}.chat-msg{font-size:14px;color:#aebac1;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.badge{background:#25D366;color:#fff;border-radius:50%;width:20px;height:20px;font-size:12px;display:flex;justify-content:center;align-items:center}.chat-header{background:#202c33;padding:10px 15px;display:flex;align-items:center;gap:12px}.back-btn{font-size:24px;cursor:pointer}.chat-area{flex:1;background:#0b141a;padding:15px;overflow-y:auto}.msg{max-width:75%;padding:8px 12px;border-radius:8px;margin-bottom:8px;word-wrap:break-word;font-size:15px;line-height:1.4}.sent{background:#005c4b;margin-left:auto;border-top-right-radius:0}.received{background:#202c33;margin-right:auto;border-top-left-radius:0}.msg-time{font-size:11px;color:#aebac1;text-align:right;margin-top:4px}.input-bar{background:#202c33;padding:10px;display:flex;gap:8px;align-items:center}.input-bar input{flex:1;padding:12px;border-radius:25px;border:none;background:#2a3942;color:#fff}.send-btn{width:45px;height:45px;background:#8B5CF6;border-radius:50%;display:flex;justify-content:center;align-items:center;cursor:pointer;font-size:20px}.bottom-nav{position:fixed;bottom:0;width:100%;background:#202c33;display:flex;justify-content:space-around;padding:10px 0;border-top:1px solid #2a3942}.nav-item{text-align:center;font-size:12px;color:#aebac1}.nav-item.active{color:#8B5CF6}.nav-icon{font-size:24px}.fab{position:fixed;bottom:80px;right:20px;width:55px;height:55px;background:#8B5CF6;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:28px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.4)}</style>
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="header">
-  <h1>LinkUp</h1>
-  <div class="header-icons">📷 ⋮</div>
+<div class="screen active" id="s1">
+  <div class="header"><h1>LinkUp 🔮</h1><div>📷 ⋮</div></div>
+  <div class="search"><input placeholder="Ask LinkUp AI or Search"></div>
+  <div class="filters"><div class="filter active">All</div><div class="filter">Unread 1</div><div class="filter">Favorites</div><div class="filter">Groups</div><div class="filter">+</div></div>
+  <div class="chat-list" id="list"></div>
+  <div class="fab">+</div>
+  <div class="bottom-nav"><div class="nav-item active"><div class="nav-icon">💬</div><div>Chats</div></div><div class="nav-item"><div class="nav-icon">📷</div><div>Updates</div></div><div class="nav-item"><div class="nav-icon">👥</div><div>Communities</div></div><div class="nav-item"><div class="nav-icon">📞</div><div>Calls</div></div></div>
 </div>
 
-<!-- SEARCH -->
-<div class="search">
-  <input type="text" placeholder="Ask Meta AI or Search">
-</div>
-
-<!-- FILTERS -->
-<div class="filters">
-  <div class="filter active">All</div>
-  <div class="filter">Unread 1</div>
-  <div class="filter">Favorites</div>
-  <div class="filter">Groups</div>
-  <div class="filter">+</div>
-</div>
-
-<!-- CHAT LIST -->
-<div class="chat-list">
-  
-  <div class="chat-item">
-    <div class="avatar" style="background:#9C27B0">🔮</div>
-    <div class="chat-info">
-      <div class="chat-top">
-        <div class="chat-name">Meta AI</div>
-        <div class="chat-time">7:51 PM</div>
-      </div>
-      <div class="chat-msg"><span style="color:#25D366">Draft:</span> Create the chat na</div>
-    </div>
-  </div>
-  
-  <div class="chat-item">
-    <div class="avatar" style="background:#E91E63">M</div>
-    <div class="chat-info">
-      <div class="chat-top">
-        <div class="chat-name">My Brother</div>
-        <div class="chat-time" style="color:#25D366">7:11 PM</div>
-      </div>
-      <div class="chat-msg">📞 Voice call</div>
-    </div>
-    <div class="badge">1</div>
-  </div>
-  
-  <div class="chat-item">
-    <div class="avatar" style="background:#FF5722">R</div>
-    <div class="chat-info">
-      <div class="chat-top">
-        <div class="chat-name">+234 703 319 5512</div>
-        <div class="chat-time">5:16 PM</div>
-      </div>
-      <div class="chat-msg">✓ I day</div>
-    </div>
-  </div>
-  
-  <div class="chat-item">
-    <div class="avatar" style="background:url('https://i.pravatar.cc/50?img=1') center/cover"></div>
-    <div class="chat-info">
-      <div class="chat-top">
-        <div class="chat-name">4EVER-PAID 4L</div>
-        <div class="chat-time">5:07 PM</div>
-      </div>
-      <div class="chat-msg">✓ K</div>
-    </div>
-  </div>
-  
-  <div class="chat-item">
-    <div class="avatar" style="background:#4CAF50">K</div>
-    <div class="chat-info">
-      <div class="chat-top">
-        <div class="chat-name">Kellylivinglarge</div>
-        <div class="chat-time">11:08 AM</div>
-      </div>
-      <div class="chat-msg">✓ I day</div>
-    </div>
-  </div>
-  
-  <div class="chat-item">
-    <div class="avatar" style="background:url('https://i.pravatar.cc/50?img=2') center/cover"></div>
-    <div class="chat-info">
-      <div class="chat-top">
-        <div class="chat-name">Okala</div>
-        <div class="chat-time">8:18 AM</div>
-      </div>
-      <div class="chat-msg">✓ I just day</div>
-    </div>
-    <div style="background:#8B5CF6; padding:4px 8px; border-radius:15px; font-size:12px">🔮 Ask LinkUp AI</div>
-  </div>
-  
-  <div class="chat-item">
-    <div class="avatar" style="background:url('https://i.pravatar.cc/50?img=3') center/cover"></div>
-    <div class="chat-info">
-      <div class="chat-top">
-        <div class="chat-name">Big Elonmusk 🚀🔥</div>
-        <div class="chat-time">Yesterday</div>
-      </div>
-      <div class="chat-msg">✓ 171-927</div>
-    </div>
-  </div>
-  
-</div>
-
-<!-- FLOATING BUTTON -->
-<div class="fab">+</div>
-
-<!-- BOTTOM NAV -->
-<div class="bottom-nav">
-  <div class="nav-item active">
-    <div class="nav-icon">💬</div>
-    <div>Chats</div>
-  </div>
-  <div class="nav-item">
-    <div class="nav-icon">📷</div>
-    <div>Updates</div>
-  </div>
-  <div class="nav-item">
-    <div class="nav-icon">👥</div>
-    <div>Communities</div>
-  </div>
-  <div class="nav-item">
-    <div class="nav-icon">📞</div>
-    <div>Calls</div>
-  </div>
+<div class="screen" id="s2">
+  <div class="chat-header"><div class="back-btn" onclick="back()">←</div><div class="avatar" id="av">🔮</div><div><div class="chat-name" id="nm">Meta AI</div><div style="font-size:12px;color:#aebac1">online</div></div></div>
+  <div class="chat-area" id="area"></div>
+  <div class="input-bar"><input id="inp" placeholder="Message"><div class="send-btn" onclick="send()">➤</div></div>
 </div>
 
 <script>
-  // Click chat to open
-  document.querySelectorAll('.chat-item').forEach(item => {
-    item.addEventListener('click', () => {
-      alert('Opening chat... Next we go build the chat screen');
-    });
-  });
+const chats=[{id:1,n:"Meta AI",a:"🔮",c:"#9C27B0",t:"7:51 PM",l:"Draft: Create the chat na",u:0,d:1,m:[{x:"Welcome to LinkUp! 🔮",s:0,t:"7:50 PM"},{x:"Create the chat na",s:1,t:"7:51 PM"}]},{id:2,n:"My Brother",a:"M",c:"#E91E63",t:"7:11 PM",l:"📞 Voice call",u:1,m:[{x:"You dey house?",s:0,t:"7:10 PM"}]},{id:3,n:"+234 703 319 5512",a:"R",c:"#FF5722",t:"5:16 PM",l:"✓ I day",u:0,m:[{x:"I day",s:1,t:"5:16 PM"}]},{id:4,n:"4EVER-PAID 4L",a:"4",c:"#00BCD4",t:"5:07 PM",l:"✓✓ K",u:0,m:[{x:"K",s:1,t:"5:07 PM"}]},{id:5,n:"Kellylivinglarge",a:"K",c:"#4CAF50",t:"11:08 AM",l:"✓ I day",u:0,m:[{x:"I day",s:1,t:"11:08 AM"}]}];
+let cur=null;
+function load(){list.innerHTML="";chats.forEach(c=>{list.innerHTML+=`<div class="chat-item" onclick="open(${c.id})"><div class="avatar" style="background:${c.c}">${c.a}</div><div class="chat-info"><div class="chat-top"><div class="chat-name">${c.n}</div><div class="chat-time" style="color:${c.u?'#25D366':'#aebac1'}">${c.t}</div></div><div class="chat-msg">${c.d?'<span style="color:#25D366">Draft:</span> ':''}${c.l}</div></div>${c.u?`<div class="badge">${c.u}</div>`:''}</div>`})}
+function open(id){cur=chats.find(x=>x.id==id);cur.u=0;s1.classList.remove("active");s2.classList.add("active");nm.innerText=cur.n;av.innerText=cur.a;av.style.background=cur.c;msg()}
+function msg(){area.innerHTML="";cur.m.forEach(m=>{area.innerHTML+=`<div class="msg ${m.s?'sent':'received'}">${m.x}<div class="msg-time">${m.t} ${m.s?'✓':''}</div></div>`});area.scrollTop=area.scrollHeight}
+function send(){if(inp.value.trim()=="")return;let t=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});cur.m.push({x:inp.value,s:1,t:t});cur.l=inp.value;cur.t=t;inp.value="";msg();load();setTimeout(()=>{cur.m.push({x:"Got it boss! 🔥",s:0,t:t});msg()},1500)}
+function back(){s2.classList.remove("active");s1.classList.add("active");load()}
+inp.addEventListener("keypress",e=>{if(e.key=="Enter")send()});
+load();
 </script>
-
 </body>
 </html>
