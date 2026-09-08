@@ -5,30 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LINKup</title>
   <meta name="theme-color" content="#8b5cf6">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
-    * { margin:0; padding:0; font-family:sans-serif; }
-    body { background: #8b5cf6; height:100vh; }
-   .screen { display: none; height:100vh; flex-direction: column; }
-   .screen.active { display: flex; }
-   .login-box { background: white; margin: auto; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; }
-   input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; }
-   button { width: 100%; padding: 12px; background: #8b5cf6; color: white; border: none; border-radius: 10px; font-weight: bold; }
-   .header { background: #7c3aed; color: white; padding: 15px; text-align: center; font-size: 20px; font-weight: bold; position:relative; }
-   .logout { position:absolute; right:15px; top:15px; font-size:14px; cursor:pointer; }
-   .add-contact { padding: 10px; background: white; display: flex; gap: 8px; }
-   .add-contact input { flex: 1; }
-   .add-contact button { width: 80px; }
-   .contacts { background: white; padding: 10px; display: flex; gap: 10px; overflow-x: auto; }
-   .contact { background: #eee; padding: 8px 15px; border-radius: 20px; cursor: pointer; white-space:nowrap; }
-   .contact.active { background: #8b5cf6; color: white; }
-   .chat-area { flex: 1; background: #e5ddd5; padding: 15px; overflow-y: auto; }
-   .msg { margin: 8px 0; display: flex; }
-   .msg.you { justify-content: flex-end; }
-   .bubble { max-width: 75%; padding: 10px 14px; border-radius: 12px; background: white; }
-   .msg.you .bubble { background: #dcf8c6; }
-   .input-area { background: white; padding: 10px; display: flex; gap: 8px; }
-   .input-area input { flex: 1; padding: 12px; border-radius: 25px; }
-   .input-area button { width: 45px; border-radius: 50%; font-size:20px; }
+    * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { background: #8b5cf6; height:100vh; overflow:hidden; }
+  .screen { display: none; height:100vh; flex-direction: column; }
+  .screen.active { display: flex; }
+   .login-box { background: white; margin: auto; padding: 30px 25px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+  .login-box h2 { color: #8b5cf6; margin-bottom: 20px; font-size: 28px; }
+    input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; outline: none; text-align:center; }
+    input:focus { border-color: #8b5cf6; }
+    button { width: 100%; padding: 14px; background: #8b5cf6; color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; }
+    button:active { background: #7c3aed; }
+    #status { color:red; margin-top:10px; font-size:14px; min-height:20px; }
+  .otp-input { letter-spacing: 8px; font-size: 24px; font-weight:bold; }
+  .header { background: #7c3aed; color: white; padding: 15px; text-align: center; font-size: 20px; font-weight: bold; position:relative; }
+  .logout { position:absolute; right:15px; top:50%; transform:translateY(-50%); font-size:14px; cursor:pointer; background:rgba(255,255,255,0.2); padding:5px 10px; border-radius:15px; }
+  .add-contact { padding: 10px; background: white; display: flex; gap: 8px; }
+  .add-contact input { flex: 1; margin:0; text-align:left; }
+  .add-contact button { width: 80px; }
+  .contacts { background: white; padding: 10px; display: flex; gap: 10px; overflow-x: auto; border-bottom: 1px solid #eee; }
+  .contact { background: #f3f0ff; padding: 8px 15px; border-radius: 20px; cursor: pointer; white-space:nowrap; font-size:14px; }
+  .contact.active { background: #8b5cf6; color: white; }
+  .chat-area { flex: 1; background: #e5ddd5; padding: 15px; overflow-y: auto; }
+  .msg { margin: 8px 0; display: flex; }
+  .msg.you { justify-content: flex-end; }
+  .bubble { max-width: 75%; padding: 10px 14px; border-radius: 12px; background: white; box-shadow: 0 1px 1px rgba(0,0,0,0.1); word-wrap:break-word; }
+  .msg.you.bubble { background: #dcf8c6; }
+  .input-area { background: white; padding: 10px; display: flex; gap: 8px; align-items:center; }
+  .input-area input { flex: 1; padding: 12px 16px; border-radius: 25px; border: 1px solid #ddd; margin:0; text-align:left; }
+  .input-area button { width: 55px; height:55px; border-radius: 50%; font-size:24px; padding:0; flex-shrink:0; }
   </style>
 </head>
 <body>
@@ -37,10 +43,18 @@
 <div class="screen active" id="loginScreen">
   <div class="login-box">
     <h2>LINKup 💜</h2>
-    <input id="email" type="email" placeholder="Email" value="maroejiata02@gmail.com">
-    <input id="password" type="password" placeholder="Password" value="linkup123">
-    <button onclick="login()">Continue</button>
-    <p id="status" style="color:red; margin-top:10px;"></p>
+    <div id="step1">
+      <input id="email" type="email" placeholder="Enter Email">
+      <input id="password" type="password" placeholder="Enter Password">
+      <button onclick="sendOTP()">Send Code</button>
+    </div>
+    <div id="step2" style="display:none;">
+      <p>We sent 6-digit code to your email</p>
+      <input id="otp" type="number" placeholder="Enter Code" class="otp-input" maxlength="6">
+      <button onclick="verifyOTP()">Verify & Login</button>
+      <button onclick="backToStep1()" style="background:#ccc; margin-top:8px;">Back</button>
+    </div>
+    <p id="status"></p>
   </div>
 </div>
 
@@ -52,7 +66,7 @@
     <button onclick="addContact()">Add</button>
   </div>
   <div class="contacts" id="contacts"></div>
-  <div class="chat-area" id="chatArea"><p style="text-align:center; color:#666;">Add a contact to start chatting</p></div>
+  <div class="chat-area" id="chatArea"><p style="text-align:center; color:#666; margin-top:20px;">Add a contact to start chatting</p></div>
   <div class="input-area">
     <input id="msgInput" placeholder="Type a message" onkeypress="if(event.key==='Enter') sendMessage()">
     <button onclick="sendMessage()">➤</button>
@@ -63,6 +77,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+emailjs.init("KJEoUoylcmZSlrELm");
 
 const firebaseConfig = {
   apiKey: "AIzaSyDyhQhEncYDaQscOtMrxz9Uj_-0-6XR-_s",
@@ -78,27 +94,64 @@ const db = getDatabase(app);
 let currentUser = null;
 let contacts = [];
 let activeContact = null;
+let generatedOTP = "";
+let tempEmail = "";
+let tempPass = "";
 
-// THIS IS THE MAGIC: AUTO SWITCH WHEN LOGIN
 onAuthStateChanged(auth, user => {
   if(user){
     currentUser = user;
     document.getElementById('loginScreen').classList.remove('active');
     document.getElementById('chatScreen').classList.add('active');
     loadContacts();
+  } else {
+    document.getElementById('loginScreen').classList.add('active');
+    document.getElementById('chatScreen').classList.remove('active');
   }
 });
 
-window.login = async function(){
-  let email = document.getElementById('email').value;
-  let pass = document.getElementById('password').value;
-  document.getElementById('status').innerText = "Logging in...";
-  try{
-    await createUserWithEmailAndPassword(auth, email, pass);
-    document.getElementById('status').innerText = "Account Created!";
-  } catch(e){
-    await signInWithEmailAndPassword(auth, email, pass);
+window.sendOTP = async function(){
+  tempEmail = document.getElementById('email').value;
+  tempPass = document.getElementById('password').value;
+  if(!tempEmail ||!tempPass) return document.getElementById('status').innerText = "Fill email and password";
+  
+  generatedOTP = Math.floor(100000 + Math.random() * 900000);
+  
+  document.getElementById('status').innerText = "Sending code...";
+  document.getElementById('status').style.color = "#8b5cf6";
+  
+  // MATCH YOUR TEMPLATE VARIABLES: {{code}} and {{to_name}}
+  emailjs.send("service_uc6ois9", "template_7tzm37", {
+    to_email: tempEmail,
+    code: generatedOTP, // CHANGED FROM otp_code TO code
+    to_name: tempEmail.split('@')[0]
+  }).then(() => {
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = 'block';
+    document.getElementById('status').innerText = "Code sent! Check inbox/spam";
+  }).catch(err => {
+    document.getElementById('status').innerText = "Error: " + err.text;
+  });
+}
+
+window.verifyOTP = async function(){
+  let userOTP = document.getElementById('otp').value;
+  if(userOTP == generatedOTP){
+    document.getElementById('status').innerText = "Verifying...";
+    try{
+      await createUserWithEmailAndPassword(auth, tempEmail, tempPass);
+    } catch(e){
+      await signInWithEmailAndPassword(auth, tempEmail, tempPass);
+    }
+  } else {
+    document.getElementById('status').innerText = "Wrong code. Try again";
   }
+}
+
+window.backToStep1 = function(){
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step1').style.display = 'block';
+  document.getElementById('status').innerText = "";
 }
 
 window.logout = function(){ signOut(auth); }
@@ -113,22 +166,27 @@ window.addContact = function(){
 
 function loadContacts(){
   onValue(ref(db, 'users/' + currentUser.uid + '/contacts'), snap => {
-    contacts = snap.val() ? Object.values(snap.val()) : [];
+    contacts = snap.val()? Object.values(snap.val()) : [];
     let html = "";
-    contacts.forEach(c => { html += `<div class="contact" onclick="selectContact('${c}')">${c}</div>`; });
+    contacts.forEach(c => { 
+      html += `<div class="contact ${c===activeContact?'active':''}" onclick="selectContact('${c}')">${c}</div>`; 
+    });
     document.getElementById('contacts').innerHTML = html;
   });
 }
 
 window.selectContact = function(email){
   activeContact = email;
+  document.querySelectorAll('.contact').forEach(el => el.classList.remove('active'));
+  event.target.classList.add('active');
   onValue(ref(db, 'chats/' + chatId()), snap => {
     let html = "";
     snap.forEach(child => {
       let m = child.val();
       html += `<div class="msg ${m.sender===currentUser.email?'you':''}"><div class="bubble">${m.text}</div></div>`;
     });
-    document.getElementById('chatArea').innerHTML = html || "<p style='text-align:center;color:#666;'>Say Hi!</p>";
+    document.getElementById('chatArea').innerHTML = html || "<p style='text-align:center;color:#666;margin-top:20px;'>Say Hi!</p>";
+    document.getElementById('chatArea').scrollTop = document.getElementById('chatArea').scrollHeight;
   });
 }
 
@@ -136,8 +194,8 @@ function chatId(){ return btoa([currentUser.email, activeContact].sort().join("_
 
 window.sendMessage = function(){
   let text = document.getElementById('msgInput').value;
-  if(text && activeContact){
-    push(ref(db, 'chats/' + chatId()), { sender: currentUser.email, text: text });
+  if(text && activeContact && currentUser){
+    push(ref(db, 'chats/' + chatId()), { sender: currentUser.email, text: text, time: Date.now() });
     document.getElementById('msgInput').value = "";
   }
 }
