@@ -3,214 +3,86 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LinkUp</title>
+<title>LinkUp - Email Verification</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
-  :root {
-    --linkup-primary: #7C3AED;  /* Purple */
-    --linkup-dark: #0b0814;     /* Dark bg */
-    --linkup-chat: #16122a;     /* Chat bg */
-    --linkup-bubble-me: #7C3AED;
-    --linkup-bubble-other: #2d2942;
-    --text: #e9e9e9;
-  }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
-
-  body {
-    background: var(--linkup-dark);
-    color: var(--text);
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* TOP BAR */
-  .topbar {
-    background: var(--linkup-primary);
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  }
-  .topbar img {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    background: #fff;
-  }
-  .topbar .info b { font-size: 16px; }
-  .topbar .info small { font-size: 12px; opacity: 0.8; }
-
-  /* CHAT AREA */
-  .chat-area {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
-    background: var(--linkup-chat);
-    background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%237C3AED' fill-opacity='0.05' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E");
-  }
-
-  .message {
-    display: flex;
-    margin-bottom: 8px;
-  }
-  .bubble {
-    max-width: 70%;
-    padding: 10px 14px;
-    border-radius: 12px;
-    line-height: 1.4;
-    font-size: 15px;
-  }
-  .me {
-    justify-content: flex-end;
-  }
-  .me .bubble {
-    background: var(--linkup-bubble-me);
-    border-radius: 12px 0 12px 12px;
-  }
-  .other {
-    justify-content: flex-start;
-  }
-  .other .bubble {
-    background: var(--linkup-bubble-other);
-    border-radius: 0 12px 12px 12px;
-  }
-  .time {
-    font-size: 11px;
-    opacity: 0.6;
-    margin-left: 6px;
-  }
-
-  /* INPUT BAR */
-  .input-bar {
-    display: flex;
-    padding: 10px;
-    background: #1e1b2e;
-    gap: 8px;
-  }
-  .input-bar input {
-    flex: 1;
-    border: none;
-    border-radius: 24px;
-    padding: 12px 18px;
-    background: var(--linkup-bubble-other);
-    color: var(--text);
-    font-size: 15px;
-    outline: none;
-  }
-  .input-bar button {
-    background: var(--linkup-primary);
-    border: none;
-    border-radius: 50%;
-    width: 46px;
-    height: 46px;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-  }
-  .input-bar button:active { transform: scale(0.95); }
-
-  /* LOGIN SCREEN */
-  .login {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    gap: 20px;
-    padding: 20px;
-  }
-  .login h1 { color: var(--linkup-primary); }
-  .login input {
-    width: 100%;
-    max-width: 300px;
-    padding: 14px;
-    border-radius: 12px;
-    border: 1px solid #3a3652;
-    background: var(--linkup-bubble-other);
-    color: var(--text);
-    font-size: 16px;
-  }
-  .login button {
-    width: 100%;
-    max-width: 300px;
-    padding: 14px;
-    border-radius: 12px;
-    border: none;
-    background: var(--linkup-primary);
-    color: white;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-  }
+  body { font-family: Arial; background: #0a0a0a; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; }
+  .box { background: #1a1a1a; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px; }
+  input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #222; color: white; }
+  button { width: 100%; padding: 12px; background: #8B5CF6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+  button:disabled { background: #555; }
+  .hidden { display: none; }
 </style>
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
-<div class="login" id="loginScreen">
-  <h1>LinkUp</h1>
-  <input type="tel" id="phone" placeholder="+2347067087764">
-  <input type="text" id="code" placeholder="Enter code: 123456">
-  <button onclick="login()">Verify & Login</button>
-</div>
-
-<!-- CHAT SCREEN -->
-<div id="chatScreen" style="display:none; flex-direction:column; height:100vh;">
-  <div class="topbar">
-    <img src="https://i.pravatar.cc/100">
-    <div class="info">
-      <b>LinkUp Friend</b>
-      <small>online</small>
-    </div>
+<div class="box">
+  <h2>LinkUp 🔮</h2>
+  
+  <!-- STEP 1: ENTER EMAIL -->
+  <div id="step1">
+    <p>Enter your email to get verification code</p>
+    <input type="email" id="email" placeholder="your@email.com" required>
+    <button onclick="sendOTP()">Send Code</button>
   </div>
 
-  <div class="chat-area" id="chatArea">
-    <div class="message other">
-      <div class="bubble">Hey! LinkUp dey work now 🔥<span class="time">10:30</span></div>
-    </div>
-    <div class="message me">
-      <div class="bubble">Yes bro! Our own purple own 😎<span class="time">10:31</span></div>
-    </div>
-  </div>
-
-  <div class="input-bar">
-    <input type="text" id="msgInput" placeholder="Message">
-    <button onclick="sendMsg()">➤</button>
+  <!-- STEP 2: ENTER CODE -->
+  <div id="step2" class="hidden">
+    <p>We sent code to <b id="showEmail"></b></p>
+    <input type="text" id="otp" placeholder="Enter 6 digit code" maxlength="6">
+    <button onclick="verifyOTP()">Verify</button>
+    <p id="message"></p>
   </div>
 </div>
 
 <script>
-  function login() {
-    let phone = document.getElementById('phone').value;
-    let code = document.getElementById('code').value;
-    
-    // For now just fake login. Later connect your Firebase here
-    if(code === "123456") {
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('chatScreen').style.display = 'flex';
-    } else {
-      alert("Wrong code! Use 123456 for testing");
-    }
-  }
+// YOUR EMAILJS KEYS - ALREADY PLUGGED IN
+emailjs.init("KjEOuOylcmZSiRElm");
 
-  function sendMsg() {
-    let input = document.getElementById('msgInput');
-    let msg = input.value;
-    if(msg.trim() === "") return;
-    
-    let chatArea = document.getElementById('chatArea');
-    let time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-    
-    chatArea.innerHTML += `
-      <div class="message me">
-        <div class="bubble">${msg}<span class="time">${time}</span></div>
-      </div>
-    `;
-    input.value = "";
-    chatArea.scrollTop = chatArea.scrollHeight;
+const SERVICE_ID = "service_uc66is9";
+const TEMPLATE_ID = "9nwkcll";
+
+let generatedOTP = "";
+
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+function sendOTP() {
+  const email = document.getElementById("email").value;
+  if(!email) return alert("Please enter email");
+  
+  generatedOTP = generateOTP();
+  
+  const templateParams = {
+    to_email: email,
+    code: generatedOTP
+  };
+
+  emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
+    .then(() => {
+      document.getElementById("step1").classList.add("hidden");
+      document.getElementById("step2").classList.remove("hidden");
+      document.getElementById("showEmail").innerText = email;
+      alert("Code sent! Check your email");
+    })
+    .catch((err) => {
+      alert("Error: " + JSON.stringify(err));
+    });
+}
+
+function verifyOTP() {
+  const userOTP = document.getElementById("otp").value;
+  const msg = document.getElementById("message");
+  
+  if(userOTP === generatedOTP) {
+    msg.style.color = "green";
+    msg.innerText = "✅ Verified! You can continue to LinkUp";
+  } else {
+    msg.style.color = "red";
+    msg.innerText = "❌ Wrong code. Try again";
   }
+}
 </script>
 
 </body>
