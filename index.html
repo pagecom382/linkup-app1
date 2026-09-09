@@ -5,21 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LINKup</title>
   <meta name="theme-color" content="#8b5cf6">
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
     body { background: #8b5cf6; height:100vh; overflow:hidden; }
   .screen { display: none; height:100vh; flex-direction: column; }
   .screen.active { display: flex; }
   .login-box { background: white; margin: auto; padding: 30px 25px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-  .login-box h2 { color: #8b5cf6; margin-bottom: 20px; font-size: 28px; }
+  .login-box h2 { color: #8b5cf6; margin-bottom: 15px; font-size: 28px; }
+  .login-box p { color: #666; font-size:14px; margin-bottom:20px; }
     input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; outline: none; text-align:center; }
     input:focus { border-color: #8b5cf6; }
     button { width: 100%; padding: 14px; background: #8b5cf6; color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top:8px; }
     button:active { background: #7c3aed; }
-  .btn-secondary { background: #ccc; color:#333; }
-    #status { color:red; margin-top:10px; font-size:14px; min-height:20px; }
-  .otp-input { letter-spacing: 8px; font-size: 24px; font-weight:bold; }
+    #status { color:#8b5cf6; margin-top:10px; font-size:14px; min-height:20px; font-weight:500; }
  .header { background: #7c3aed; color: white; padding: 15px; text-align: center; font-size: 20px; font-weight: bold; position:relative; }
  .logout { position:absolute; right:15px; top:50%; transform:translateY(-50%); font-size:14px; cursor:pointer; background:rgba(255,255,255,0.2); padding:5px 10px; border-radius:15px; }
  .add-contact { padding: 10px; background: white; display: flex; gap: 8px; }
@@ -43,17 +41,10 @@
 <div class="screen active" id="loginScreen">
   <div class="login-box">
     <h2>LINKup 💜</h2>
-    <div id="step1">
-      <input id="email" type="email" placeholder="Enter Email">
-      <input id="name" type="text" placeholder="Enter Your Name">
-      <button onclick="sendOTP()">Send Code</button>
-    </div>
-    <div id="step2" style="display:none;">
-      <p>We sent 6-digit code to your email</p>
-      <input id="otp" type="number" placeholder="Enter Code" class="otp-input" maxlength="6">
-      <button onclick="verifyAndEnter()">Verify & Enter Chat</button>
-      <button onclick="backToStep1()" class="btn-secondary">Back</button>
-    </div>
+    <p>Enter your email. We go send you magic link</p>
+    <input id="email" type="email" placeholder="Enter Email">
+    <input id="name" type="text" placeholder="Enter Your Name">
+    <button onclick="sendMagicLink()">Send Magic Link</button>
     <p id="status"></p>
   </div>
 </div>
@@ -73,73 +64,94 @@
 </div>
 
 <script type="module">
+// Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-emailjs.init("KJEoUoylcmZSlrELm");
 
+// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDyhQhEncYDaQscOtMrxz9Uj_-0-6XR-_s",
+  authDomain: "linkup-chat-3fdd5.firebaseapp.com",
   databaseURL: "https://linkup-chat-3fdd5-default-rtdb.firebaseio.com",
-  projectId: "linkup-chat-3fdd5"
+  projectId: "linkup-chat-3fdd5",
+  storageBucket: "linkup-chat-3fdd5.firebasestorage.app",
+  messagingSenderId: "177573067619",
+  appId: "1:177573067619:web:40e64ae330bb86200e7156",
+  measurementId: "G-Q73V61VYEQ"
 };
+
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const auth = getAuth(app);
 const db = getDatabase(app);
 
-let currentUser = null; let contacts = []; let activeContact = null; let generatedOTP = ""; let tempEmail = ""; let tempName = "";
+let currentUser = null; let contacts = []; let activeContact = null;
 
-if(localStorage.getItem('linkup_user')){
-  currentUser = JSON.parse(localStorage.getItem('linkup_user'));
-  document.getElementById('loginScreen').classList.remove('active');
-  document.getElementById('chatScreen').classList.add('active');
-  loadContacts();
-}
+// YOUR REAL LINK HERE
+const actionCodeSettings = {
+  url: 'https://pagecom382.github.io/linkup-app1/',
+  handleCodeInApp: true
+};
 
-window.sendOTP = async function(){
-  tempEmail = document.getElementById('email').value.trim();
-  tempName = document.getElementById('name').value.trim();
-  if(!tempEmail ||!tempName) return document.getElementById('status').innerText = "Fill email and name";
-  if(!tempEmail.includes("@")) return document.getElementById('status').innerText = "Enter valid email";
+window.sendMagicLink = async function(){
+  let email = document.getElementById('email').value.trim();
+  let name = document.getElementById('name').value.trim();
+  if(!email ||!name) return document.getElementById('status').innerText = "Fill email and name";
+  if(!email.includes("@")) return document.getElementById('status').innerText = "Enter valid email";
   
-  generatedOTP = Math.floor(100000 + Math.random() * 900000);
-  document.getElementById('status').innerText = "Sending code to " + tempEmail + "...";
-  document.getElementById('status').style.color = "#8b5cf6";
+  localStorage.setItem('linkup_email', email);
+  localStorage.setItem('linkup_name', name);
   
-  // CHANGED: service_default instead of service_uc6ois9
-  emailjs.send("service_default", "template_7tzm37", {
-    to_email: tempEmail, 
-    code: generatedOTP,
-    to_name: tempName
-  }).then(() => {
-    document.getElementById('step1').style.display = 'none';
-    document.getElementById('step2').style.display = 'block';
-    document.getElementById('status').innerText = "Code sent! Check inbox/spam";
+  document.getElementById('status').innerText = "Sending magic link to " + email + "...";
+  
+  sendSignInLinkToEmail(auth, email, actionCodeSettings)
+  .then(() => {
+    document.getElementById('status').innerText = "Link sent! Check your email and click it";
+    document.getElementById('status').style.color = "green";
   }).catch(err => {
-    document.getElementById('status').innerText = "Email Error: " + err.text;
+    document.getElementById('status').innerText = "Error: " + err.message;
+    document.getElementById('status').style.color = "red";
     console.log(err);
   });
 }
 
-window.verifyAndEnter = async function(){
-  let userOTP = document.getElementById('otp').value;
-  if(userOTP!= generatedOTP) return document.getElementById('status').innerText = "Wrong code. Try again";
-  
-  currentUser = { email: tempEmail, name: tempName, id: btoa(tempEmail) };
-  localStorage.setItem('linkup_user', JSON.stringify(currentUser));
-  set(ref(db, 'users/' + currentUser.id), { email: tempEmail, name: tempName });
-  
+// CHECK IF USER CLICKED THE LINK FROM EMAIL
+if(isSignInWithEmailLink(auth, window.location.href)){
+  let email = localStorage.getItem('linkup_email');
+  let name = localStorage.getItem('linkup_name');
+  if(email){
+    signInWithEmailLink(auth, email, window.location.href)
+    .then((result) => {
+      currentUser = { email: result.user.email, name: name, id: result.user.uid };
+      set(ref(db, 'users/' + currentUser.id), { email: email, name: name });
+      localStorage.removeItem('linkup_email');
+      localStorage.removeItem('linkup_name');
+      showChatScreen();
+    }).catch(err => {
+      document.getElementById('status').innerText = "Login Error: " + err.message;
+    });
+  }
+}
+
+// CHECK IF USER ALREADY LOGGED IN
+onAuthStateChanged(auth, (user) => {
+  if(user){
+    currentUser = { email: user.email, name: user.displayName || "User", id: user.uid };
+    showChatScreen();
+  }
+});
+
+function showChatScreen(){
   document.getElementById('loginScreen').classList.remove('active');
   document.getElementById('chatScreen').classList.add('active');
   loadContacts();
 }
 
-window.backToStep1 = function(){
-  document.getElementById('step2').style.display = 'none';
-  document.getElementById('step1').style.display = 'block';
-  document.getElementById('status').innerText = "";
-}
-
 window.logout = function(){ 
-  localStorage.removeItem('linkup_user');
+  signOut(auth);
   location.reload();
 }
 
